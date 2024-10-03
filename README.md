@@ -9,6 +9,7 @@ Code examples for the lecture
 5. State of the art computer vision model convolutional neiral networt (CNN): [github](https://poloclub.github.io/cnn-explainer/)
 
 ## Requriements
+- Python & Notebooks
 - VM in any cloud
 - Install Docker
 - Create base image on DockerHub
@@ -16,10 +17,10 @@ Code examples for the lecture
 
 LLM (OpenAi Cloud Azure) + Language Generation + Build Agent  -->   Implement Agents at Home
 
-1. CV (CNN) & NLP (RAG) Basics 
+1. CV (CNN) & NLP (LLM) Basics 
     - Show some basics, explain what's happening
-2. LLM from Ollama (Repetition from LLM from Video -> What are Transformers & Attention for Language Generation)
-3. LLM Agents (Reason & Act -> Combining LLMs with code)
+2. LLM - Notebook (Repetition from LLM from Video -> What are Transformers & Attention for Language Generation)
+3. LLM - Building an Application (Agents - Reason & Act -> Combining LLMs with code)
 4. Vision Transformer
 5. Multi modal models
 6. Bring it together -> VL Agent ()
