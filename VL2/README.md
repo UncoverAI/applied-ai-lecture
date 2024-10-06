@@ -4,8 +4,9 @@ Code examples for the lecture
 
 ## Requirements
 - Download & Install Ollama: https://ollama.com/
-- Install Python client for ollama: https://github.com/ollama/ollama-python
-- Pull the llama3:8b model locally
+
+## Tipps:
+- A good model to start with is ``llama3.1:8b-instruct-q4_0`` 
  
 ## Components for RAG
 1. Content Splitter -> text chunks
