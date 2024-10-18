@@ -7,7 +7,12 @@ st.set_page_config(layout="wide")
 
 SYSTEM_PROMPT = "You are a helpful AI assistant."
 SYSTEM_MESSAGE = [{"role": "system","content": SYSTEM_PROMPT}]
-models = ollama.list()
+DEFAULT_MODEL = {"name": "Error no models!", "size": 0}
+
+try:
+    models = ollama.list()["models"]
+except:
+    models = [DEFAULT_MODEL]
 
 # Global Timer Variables
 if "token_times" not in st.session_state:
@@ -30,14 +35,12 @@ def stream_response(model: str, messages: list):
 
 def stream_wrapper(stream):
     for chunk in stream:
-        # date_format = '%Y-%m-%dT%H:%M:%S.%f%Z'
-        # date_obj = datetime.strptime(chunk['created_at'], date_format)
         st.session_state.token_times.append(datetime.datetime.now())
         yield chunk['message']['content']
 
 with st.sidebar:
     st.markdown("### Select a Model:")
-    model_dict = st.selectbox(label="model selector", label_visibility="collapsed", options=models["models"], index=5, format_func=format_func)
+    model_dict = st.selectbox(label="model selector", label_visibility="collapsed", options=models, index=len(models) - 1, format_func=format_func)
     model = model_dict["name"]
 
     st.markdown("### Performance:")
@@ -73,19 +76,3 @@ if prompt := st.chat_input("Type your message"):
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": msg})
     st.rerun()
-
-
-
-# import ollama
-
-# stream = ollama.chat(
-#     model='llama3.1',
-#     messages=[{'role': 'user', 'content': 'Why is the sky blue?'}],
-#     stream=True,
-# )
-
-# for chunk in stream:
-#   print(chunk['message']['content'], end='', flush=True)
-
-# with st.chat_message(“assistant”):
-# msg = st.write_stream(response)
