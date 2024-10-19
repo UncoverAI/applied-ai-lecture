@@ -7,5 +7,5 @@ st.markdown(f"### Prompt: ``{MODEL_ID}``")
 
 if prompt := st.chat_input("Type your message"):
     st.write("You:<br>" + prompt, unsafe_allow_html=True)
-    response = ollama.generate(model=MODEL_ID, prompt=prompt)
+    response = ollama.generate(model=MODEL_ID, prompt=prompt, keep_alive="24h")
     st.write("Model:<br>" + response["response"], unsafe_allow_html=True)

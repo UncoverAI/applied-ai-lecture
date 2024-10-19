@@ -30,7 +30,7 @@ if prompt := st.chat_input("Type your message"):
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         messages = SYSTEM_MESSAGE + st.session_state.messages
-        msg = ollama.chat(model=MODEL_ID, messages=messages)['message']['content']
+        msg = ollama.chat(model=MODEL_ID, messages=messages, keep_alive="24h")['message']['content']
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": msg})
     st.rerun()

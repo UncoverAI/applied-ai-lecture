@@ -26,7 +26,7 @@ def format_func(option: dict) -> str:
 def stream_response(model: str, messages: list):
     try:
         messages = SYSTEM_MESSAGE + messages
-        stream = ollama.chat(model=model, messages=messages, stream=True)
+        stream = ollama.chat(model=model, messages=messages, stream=True, keep_alive="24h")
         st.session_state.start_time = datetime.datetime.now()
         st.session_state.token_times = []
     except Exception as e:

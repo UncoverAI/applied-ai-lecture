@@ -1,12 +1,20 @@
-# Lecture 2 - LLM Applications
+# Lecture 1 - LLM Applications
 
-Code examples for the lecture
+In this lecture we will learn how we can use Python, Streamlit and Ollama to build a simple LLM Chat App, where the LLM used is a Llama model run locally on your device.
 
-## Requirements
+## Preperation
+- Setup a Python Developement Environment (Python + Virtual Environment, VS Code + Python & Notebook Extensions)
+- Install the Python requirements in your virtual environment `pip install -r requirements.txt`
 - Download & Install Ollama: https://ollama.com/
 
+## Lecture content
+1. Setup Ollama
+2. Learn RAG
+3. Learn Agents
+4. Build an LLM App
+
 ## Tipps:
-- A good model to start with is ``llama3.1:8b-instruct-q4_0`` 
+- While ``llama3.1:8b-instruct-q4_0`` is a good model to get started with, ollama has a lot of cool models available: https://ollama.com/library
  
 ## Components for RAG
 1. Content Splitter -> text chunks
