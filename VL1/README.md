@@ -10,12 +10,10 @@ Code examples for the lecture
 - Install the requirements (e.g. `pip install -r requirements.txt`)
 
 ## Tipps:
-- A good model to start with is ``llama3.1:8b-instruct-q4_0`` 
- 
-## Components for RAG
-1. Content Splitter -> text chunks
-2. Tokenizer
-3. Embedding Model -> HF 
-4. Vector Datenbank
-5. Retriever -> Similarity Algorithm
+- A good model to start with is ``llama3.1:8b-instruct-q4_0``, but you can try any other Ollama Model with chat capabilities
+
+## Resources:
+- Model weight source: https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
+- Model benchmarks: https://ai.meta.com/blog/meta-llama-3-1/
+
 
