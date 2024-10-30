@@ -1,0 +1,8 @@
+ipykernel
+torch # --index-url https://download.pytorch.org/whl/cu124 CUDA 12.4
+torchvision # --index-url https://download.pytorch.org/whl/cu124 CUDA 12.4
+torchaudio # --index-url https://download.pytorch.org/whl/cu124 CUDA 12.4
+opencv-python
+matplotlib
+label-studio # <-- Local Labeling Server: label-studio start
+pycocotools
