@@ -18,22 +18,13 @@ LLM (OpenAi Cloud Azure) + Language Generation + Build Agent  -->   Implement Ag
 
 (These are not single lecture units rather logical seperation of content)
 
-1. CV (CNN) & NLP (LLM) Basics 
-    - Show some basics, explain what's happening
-    - LLM - Notebook (Repetition from LLM from Video -> What are Transformers & Attention for Language Generation)
-3. LLM - Building an Application (Agents - Reason & Act -> Combining LLMs with code)
-    - Basic Streamlit ChatBot App with Ollama
-    - RAG App with Ollama, Llama 3.1 8b instruct (Q4) + nomic embed --> PDF RAG for slides
-3. Vision Transformer & Multi modal models
-6. Bring it together -> VL Agent ()
-    - RAG -> Ingestion (Notebook) & Retrieval (part of agent) Pipeline
-    - Agent Definition -> students then code it
-7. A System Architecture
-    - Cloud Databases, Hosting a UI, Scaling, Deployment & Monitoring?
-8. Training a CNN (CNN still state of the art) 
-    - Train / Fine-tune model to detect any object on an image
-9. Fine-tuning an LLM (RNN, LSTM are shit, but LLMs are huge)
-    - Quantization / LoRA -> Models are too big & GPUs too expensive
-10. System Architecture Done in the cloud
-    - Host Vector DB, Host Embedding Model, Host App, Use Model API
-11. -- " --
+1. Local LLM App with Python (Python + Streamlit + Ollama)
+2. Deep Learning basics with Computer Vision (Pytorch+NeuralNets+MNIST)
+3. Language Model Basics (Transformer + Attention)
+4. Advanced LLM Apps (AI Agents + Retrieval Augmented Generation)
+5. Advanced Deep Learning with LLMs (Fine-Tuning LLMs with 7B+ params)
+6. Deployment & OPS (Cloud, Docker, CICD & GPUs)
+7. Vision Transformer & Multi modal models
+8. Bring it together -> Vision Language Agent with RAG as service
+9. Advanced System Architecture (Host Vector DB, Host Embedding Model, Host App, Use Model API)
+
