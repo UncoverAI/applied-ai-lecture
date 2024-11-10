@@ -6,7 +6,7 @@ Code examples for the lecture
 2. Be prepared to setup your IDE to develop Python.
 3. Check out this [video series](https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&si=qIJzZmIrt7hAO8Fn) to get an understanding of Deep Learning and Transformers.
 4. If you want to know how to code Neural Networks from scratch, here is a [notebook](https://www.kaggle.com/code/scaomath/simple-neural-network-for-mnist-numpy-from-scratch) to code along.
-5. State of the art computer vision model convolutional neiral networt (CNN): [github](https://poloclub.github.io/cnn-explainer/)
+5. State of the art computer vision model convolutional neural network (CNN): [github](https://poloclub.github.io/cnn-explainer/)
 
 ## Requriements
 - Python & Notebooks
@@ -14,7 +14,7 @@ Code examples for the lecture
 - Install Docker
 - Create base image on DockerHub
 
-LLM (OpenAi Cloud Azure) + Language Generation + Build Agent  -->   Implement Agents at Home
+## Content
 
 (These are not single lecture units rather logical seperation of content)
 
@@ -28,3 +28,10 @@ LLM (OpenAi Cloud Azure) + Language Generation + Build Agent  -->   Implement Ag
 8. Bring it together -> Vision Language Agent with RAG as service
 9. Advanced System Architecture (Host Vector DB, Host Embedding Model, Host App, Use Model API)
 
+## Evaluation
+
+- Group Project to build & deploy an LLM App or tuning & evaluation pipeline (16 - 32 hours work?)
+    - App can advanced RAG ChatBot
+    - App can be AI Agent
+    - Pipeline can use LLM, GPU & advanced dataset
+    - Pipeline can use VLM & GPU & standard dataset
