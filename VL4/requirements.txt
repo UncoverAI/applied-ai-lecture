@@ -3,3 +3,4 @@ ollama
 numpy
 PyPDF2
 ipykernel
+pymongo
