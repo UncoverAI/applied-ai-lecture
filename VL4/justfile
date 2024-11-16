@@ -1,0 +1,8 @@
+set shell := ["C:\\Program Files\\Git\\bin\\bash.exe", "--noprofile", "--norc", "-c"]
+
+spawn-mongo:
+    docker run -d -p 27017:27017 --name demo-mongo -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=super-save-password mongo
+
+kill-mongo:
+    docker container stop demo-mongo
+    docker container rm demo-mongo
