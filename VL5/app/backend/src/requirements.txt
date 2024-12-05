@@ -1,0 +1,4 @@
+fastapi
+ollama
+uvicorn
+requests

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  clusterIP: None # Headless service for StatefulSet
+  selector:
+    app: app
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: app
+spec:
+  selector:
+    matchLabels:
+      app: app
+  replicas: 3
+  serviceName: "app" # StatefulSet requires a headless service
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: my-pv
+              mountPath: /usr/share/nginx/html # Example mount path
+      volumes:
+      - name: my-pv
+        persistentVolumeClaim:
+          claimName: my-pvc # Reference an existing PVC
+  # Requests a new PV
+  # volumeClaimTemplates:
+  #   - metadata:
+  #       name: my-pv
+  #     spec:
+  #       accessModes: ["ReadWriteOnce"]
+  #       resources:
+  #         requests:
+  #           storage: 10Gi
