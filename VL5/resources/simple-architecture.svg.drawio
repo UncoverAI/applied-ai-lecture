@@ -1,0 +1,102 @@
+<mxfile host="65bd71144e">
+    <diagram id="QtJ-tYFltAtTafjQ8iBH" name="Basic">
+        <mxGraphModel dx="1599" dy="376" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="4" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="2" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="175" y="490" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="3" target="7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Streamlit" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="315" y="490" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="LLM Endpoint&amp;nbsp;&lt;br&gt;(Managed)&lt;br&gt;e.g. Ollama, Cloud" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="490" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;dashed=1;dashPattern=8 8;" parent="1" source="9" target="3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="This is where your code is" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="335" y="380" width="80" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="Challenges" id="omBw1cc5V-eIENwCE-2k">
+        <mxGraphModel dx="1599" dy="376" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-0"/>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-1" parent="prJdJgJN2n4Cm4waqB5O-0"/>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-2" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="prJdJgJN2n4Cm4waqB5O-1" source="prJdJgJN2n4Cm4waqB5O-3" target="prJdJgJN2n4Cm4waqB5O-5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-3" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="175" y="490" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-4" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="prJdJgJN2n4Cm4waqB5O-1" source="prJdJgJN2n4Cm4waqB5O-5" target="prJdJgJN2n4Cm4waqB5O-6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-5" value="Streamlit" style="rounded=1;whiteSpace=wrap;html=1;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="315" y="490" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="prJdJgJN2n4Cm4waqB5O-6" value="LLM Endpoint&amp;nbsp;&lt;br&gt;(Managed)&lt;br&gt;e.g. Ollama, Cloud" style="rounded=1;whiteSpace=wrap;html=1;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="555" y="490" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-0" value="What if there are alot of users. Can my server handle it?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="175" y="350" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-1" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="prJdJgJN2n4Cm4waqB5O-1" source="M8HW1r5FuBJpVYaDjSeY-0" target="prJdJgJN2n4Cm4waqB5O-5" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="360" y="420" as="sourcePoint"/>
+                        <mxPoint x="410" y="370" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-2" value="How do I get custom data in?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="435" y="660" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-3" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="prJdJgJN2n4Cm4waqB5O-1" source="M8HW1r5FuBJpVYaDjSeY-2" target="prJdJgJN2n4Cm4waqB5O-6" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="580" y="670" as="sourcePoint"/>
+                        <mxPoint x="630" y="620" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-4" value="How can I deploy my fine tuned model?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="435" y="350" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-6" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="prJdJgJN2n4Cm4waqB5O-1" source="M8HW1r5FuBJpVYaDjSeY-4" target="prJdJgJN2n4Cm4waqB5O-6" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="650" y="440" as="sourcePoint"/>
+                        <mxPoint x="700" y="390" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-7" value="Where do I store my fine tuned models?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="170" y="200" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-8" value="How do I ensure that my fine tuning didn't break it?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="170" y="110" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-9" value="Where do I store my custom data?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="315" y="110" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-10" value="Where do I store my embeddings?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="315" y="200" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-11" value="How do I keep my embeddings up to date?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="460" y="110" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-13" value="How can I spread data across multiple databases?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="460" y="200" width="125" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="M8HW1r5FuBJpVYaDjSeY-15" value="Who identifies which data fits my question?" style="text;html=1;strokeColor=#6F0000;fillColor=#a20025;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#ffffff;" parent="prJdJgJN2n4Cm4waqB5O-1" vertex="1">
+                    <mxGeometry x="610" y="200" width="125" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
