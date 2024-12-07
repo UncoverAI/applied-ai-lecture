@@ -1,0 +1,9 @@
+ipykernel
+pillow
+datasets
+torch
+transformers
+accelerate
+pydantic
+PyYAML
+jinja2==3.1.0
