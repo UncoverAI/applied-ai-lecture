@@ -52,7 +52,7 @@ class QuantConfig(BaseModel):
     bnb_4bit_use_double_quant: bool = True
     bnb_4bit_quant_type: str = "nf4"
 
-class PeftConfig(BaseModel):
+class MyLoraConfig(BaseModel):
     # Default Lora Config
     lora_alpha: int # = 16
     lora_dropout: float = 0.05
@@ -69,7 +69,7 @@ class ModelConfig(BaseModel):
     # quant stuff
     quant_config: QuantConfig | None = None
     # lora stuff
-    peft_config: PeftConfig | None = None
+    lora_config: MyLoraConfig | None = None
 
 class Arguments(BaseModel):
     output_dir: str
@@ -86,7 +86,8 @@ class Arguments(BaseModel):
     save_strategy: str
     bf16: bool
     report_to: str = "wandb"
-    dataset_text_field: str = ""
+    dataset_text_field: str = ""  # dummy field for collator
+    dataset_kwargs: dict = {"skip_prepare_dataset": True} # important for collator
     remove_unused_columns: bool = False
 
 class TrainConfig(BaseModel):
@@ -95,12 +96,13 @@ class TrainConfig(BaseModel):
     model: ModelConfig
     args: Arguments
 
-def get_peft_model(model, peft_config: PeftConfig):
-    lora_config = LoraConfig(**peft_config.model_dump())
+def create_peft_model(model, lora_config: MyLoraConfig):
+    lora_config = LoraConfig(**lora_config.model_dump())
     # Apply PEFT model adaptation
     peft_model = get_peft_model(model, lora_config)
     # Print trainable parameters
     peft_model.print_trainable_parameters()
+    return peft_model
 
 def get_model(model_config: ModelConfig):
     bnb_config = None
@@ -113,33 +115,34 @@ def get_model(model_config: ModelConfig):
         model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
     )
     
-    if model_config.peft_config:
-        model = get_peft_model(model, model_config.peft_config)
+    if model_config.lora_config:
+        model = create_peft_model(model, model_config.lora_config)
     return model, processor
 
 
 def main(train_config: TrainConfig | dict):
     train_config = train_config if isinstance(train_config, TrainConfig) else TrainConfig(**train_config)
-    wandb.init(project="tune-qwen", config=train_config)
+    # wandb.init(project="tune-qwen", config=train_config)
     # Configure training arguments
     training_args = SFTConfig(**train_config.args.model_dump())
     model, processor = get_model(model_config=train_config.model)
     
     ds = load_dataset(train_config.dataset)
+    # ds = {key: value.select(range(32)) for key, value in ds.items()}
     train_dataset, eval_dataset = ds["train"].map(make_conversation, num_proc=train_config.num_proc) , ds["test"].map(make_conversation, num_proc=train_config.num_proc)
-
+    print(train_dataset)
+    print(model)
     trainer = SFTTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=get_collate_fn(processor),
-        peft_config=LoraConfig(**train_config.model.peft_config.model_dump()),
         tokenizer=processor.tokenizer,
     )
 
-    # trainer.train()
-    # trainer.save_model(training_args.output_dir)
+    trainer.train()
+    trainer.save_model(training_args.output_dir)
 
 if __name__=="__main__":
     import argparse
