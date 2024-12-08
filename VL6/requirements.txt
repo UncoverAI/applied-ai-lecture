@@ -6,4 +6,7 @@ transformers
 accelerate
 pydantic
 PyYAML
+torchmetrics
+peft
+bitsandbytes
 jinja2==3.1.0

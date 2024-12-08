@@ -1,0 +1,27 @@
+dataset: HuggingFaceM4/ChartQA
+num_proc: 16
+model:
+  model_id: Qwen/Qwen2-VL-7B-Instruct
+  device_map: auto
+  torch_dtype: bfloat16
+  max_tokens: 1024
+  quant_config:
+    load_in_4bit: true
+  peft_config:
+    lora_alpha: 16
+    lora_dropout: 0.05
+    r: 8
+args:
+  output_dir: qwen2-7b-instruct-trl-sft-ChartQA
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 8
+  optim: adamw_torch_fused
+  learning_rate: 0.0002
+  lr_scheduler_type: constant
+  logging_steps: 10
+  eval_steps: 10
+  eval_strategy: steps
+  save_strategy: 'no'
+  bf16: true
