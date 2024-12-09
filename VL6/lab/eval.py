@@ -95,7 +95,6 @@ def main(eval_config: EvalConfig | dict):
     eval_config = eval_config if isinstance(eval_config, EvalConfig) else EvalConfig(**eval_config)
     wandb.init(project="eval-qwen", config=eval_config)
     val_ds = load_dataset(eval_config.data_config.dataset, split=eval_config.data_config.split)
-    val_ds = val_ds.select(range(32))
     if not CONVERSATION_COL in val_ds.column_names:
         val_ds = val_ds.map(make_conversation, num_proc=eval_config.data_config.num_proc)
     if not ACTUAL_COL in val_ds.column_names:

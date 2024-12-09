@@ -63,6 +63,7 @@ class MyLoraConfig(BaseModel):
 
 class ModelConfig(BaseModel):
     model_id: str
+    repo_id: str
     device_map: str
     torch_dtype: str
     max_tokens: int
@@ -128,7 +129,7 @@ def main(train_config: TrainConfig | dict):
     model, processor = get_model(model_config=train_config.model)
     
     ds = load_dataset(train_config.dataset)
-    ds = {key: value.select(range(256)) for key, value in ds.items()}
+    #ds = {key: value.select(range(256)) for key, value in ds.items()}
     train_dataset, eval_dataset = ds["train"].map(make_conversation, num_proc=train_config.num_proc) , ds["test"].map(make_conversation, num_proc=train_config.num_proc)
     print(train_dataset)
     print(model)
@@ -143,6 +144,7 @@ def main(train_config: TrainConfig | dict):
 
     trainer.train()
     trainer.save_model(training_args.output_dir)
+    model.push_to_hub(repo_id=train_config.model.repo_id)
 
 if __name__=="__main__":
     import argparse
