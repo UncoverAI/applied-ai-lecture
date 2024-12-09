@@ -2,7 +2,7 @@ ipykernel
 pillow
 datasets
 torch
-transformers
+transformers==4.46.3
 trl
 accelerate
 pydantic
@@ -11,4 +11,5 @@ torchmetrics
 peft
 bitsandbytes
 wandb
+nltk
 jinja2==3.1.0

@@ -1,0 +1,8 @@
+dataset: HuggingFaceM4/ChartQA
+split: val
+model: Qwen/Qwen2-VL-7B-Instruct
+torch_dtype: bfloat16 
+device_map: auto
+num_proc: 16
+max_new_tokens: 128
+output_path: /home/ubuntu/code/applied-ai-lecture/VL6/lab/pre_eval_result.jsonl

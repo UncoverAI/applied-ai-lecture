@@ -2,6 +2,7 @@ from datasets import load_dataset
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 from pydantic import BaseModel
 from torchmetrics.text import ROUGEScore
+import wandb
 
 ACTUAL_COL = "results"
 LABEL_COL = "label"
@@ -52,11 +53,11 @@ def eval(model, processor, ds, max_new_tokens, result_path):
         results.append(output)
         print(f"Iteration {i}\n{output}\n\n{'#'*120}")
     ds = ds.add_column(ACTUAL_COL, results)
-    save_dataset(ds)
+    save_dataset(ds, result_path=result_path)
     return ds
 
 
-def compare(ds, actual_col: str = ACTUAL_COL, label_col: str = LABEL_COL):
+def compare(ds, result_path: str, actual_col: str = ACTUAL_COL, label_col: str = LABEL_COL):
     rouge = ROUGEScore()
     def row_compare(sample):
         # we define "is_label_contained" as "correct" to have a simple binary measure
@@ -65,12 +66,12 @@ def compare(ds, actual_col: str = ACTUAL_COL, label_col: str = LABEL_COL):
         sample[ROUGE_COL] = rouge(preds=sample[actual_col], target=sample[label_col][0])['rouge1_fmeasure']
         return sample
     ds = ds.map(row_compare, num_proc=8)
-    save_dataset(ds)
+    save_dataset(ds, result_path=result_path)
     return ds
 
 def compute_metrics(ds):
     metrics = {}
-    metrics["accuracy"] = sum(ds["is_label_contained"]) / len(ds)
+    metrics["accuracy"] = sum(ds[CORRECT_COL]) / len(ds)
     metrics["avg_rouge"] = sum(ds[ROUGE_COL]) / len(ds)
     return metrics
 
@@ -88,6 +89,7 @@ class EvalConfig(BaseModel):
 
 def main(eval_config: EvalConfig | dict):
     eval_config = eval_config if isinstance(eval_config, EvalConfig) else EvalConfig(**eval_config)
+    wandb.init(project="eval-qwen", config=eval_config)
     val_ds = load_dataset(eval_config.dataset, split=eval_config.split)
     if not CONVERSATION_COL in val_ds.column_names:
         val_ds = val_ds.map(make_conversation, num_proc=eval_config.num_proc)
@@ -97,10 +99,12 @@ def main(eval_config: EvalConfig | dict):
         model = Qwen2VLForConditionalGeneration.from_pretrained(eval_config.model, torch_dtype=eval_config.torch_dtype, device_map=eval_config.device_map)
         if eval_config.adapter_path:
             model.load_adapter(eval_config.adapter_path)
+        print(model)
         eval_ds = eval(model, processor , val_ds, eval_config.max_new_tokens, eval_config.output_path)
     if not (ROUGE_COL in val_ds.column_names and CORRECT_COL in val_ds.column_names):
-        eval_ds = compare(eval_ds)
+        eval_ds = compare(eval_ds, eval_config.output_path)
     eval_metrics = compute_metrics(eval_ds)
+    wandb.log(eval_metrics)
     # TODO write metrics somewhere
     print(eval_metrics)
 

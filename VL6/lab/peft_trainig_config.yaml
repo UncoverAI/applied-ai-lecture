@@ -5,6 +5,12 @@ model:
   device_map: auto
   torch_dtype: bfloat16
   max_tokens: 1024
+  quant_config:
+    load_in_4bit: true
+  lora_config:
+    lora_alpha: 16
+    lora_dropout: 0.05
+    r: 8
 args:
   output_dir: tuned_qwen
   num_train_epochs: 1

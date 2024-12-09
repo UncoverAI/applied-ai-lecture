@@ -48,13 +48,13 @@ def get_collate_fn(processor):
 
 class QuantConfig(BaseModel):
     # BitsAndBytesConfig int-4 config
-    load_in_4bit: bool
+    load_in_4bit: bool = True
     bnb_4bit_use_double_quant: bool = True
     bnb_4bit_quant_type: str = "nf4"
 
 class MyLoraConfig(BaseModel):
     # Default Lora Config
-    lora_alpha: int # = 16
+    lora_alpha: int = 16
     lora_dropout: float = 0.05
     r: int = 8
     bias: str = "none"
@@ -122,13 +122,13 @@ def get_model(model_config: ModelConfig):
 
 def main(train_config: TrainConfig | dict):
     train_config = train_config if isinstance(train_config, TrainConfig) else TrainConfig(**train_config)
-    # wandb.init(project="tune-qwen", config=train_config)
+    wandb.init(project="tune-qwen", config=train_config)
     # Configure training arguments
     training_args = SFTConfig(**train_config.args.model_dump())
     model, processor = get_model(model_config=train_config.model)
     
     ds = load_dataset(train_config.dataset)
-    # ds = {key: value.select(range(32)) for key, value in ds.items()}
+    ds = {key: value.select(range(256)) for key, value in ds.items()}
     train_dataset, eval_dataset = ds["train"].map(make_conversation, num_proc=train_config.num_proc) , ds["test"].map(make_conversation, num_proc=train_config.num_proc)
     print(train_dataset)
     print(model)
