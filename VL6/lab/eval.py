@@ -1,4 +1,4 @@
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 from pydantic import BaseModel
 from torchmetrics.text import ROUGEScore
@@ -32,20 +32,35 @@ def chat(model, processor, conversation, image, max_new_tokens, verbose = True):
     )
     return output_text[0]
 
+class DataConfig(BaseModel):
+    dataset: str
+    split: str
+    repo_id: str
+    num_proc: int
+    revision: str | None = None
+
+class EvalConfig(BaseModel):
+    model: str
+    torch_dtype:str
+    device_map:str
+    max_new_tokens: int
+    data_config: DataConfig
+    adapter_path: str | None = None
+
 def make_conversation(sample):
     sample[CONVERSATION_COL] = [
         {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample["query"]}]}
     ]
     return sample
 
-def save_dataset(ds, result_path: str):
+def save_dataset(ds: Dataset, data_config: DataConfig):
     # TODO potentially push to hub instead of using local storage
     # Saving images is not necessary
     ds = ds.remove_columns("image")
-    with open(result_path, "wb") as f:
-        ds.to_json(f)
+    ds.push_to_hub(repo_id=data_config.repo_id, revision=data_config.revision)
     
-def eval(model, processor, ds, max_new_tokens, result_path):
+    
+def eval(model, processor: AutoProcessor, ds: Dataset, max_new_tokens: int, data_config: DataConfig):
     model.eval()
     results = []
     for i, sample in enumerate(ds):
@@ -53,11 +68,11 @@ def eval(model, processor, ds, max_new_tokens, result_path):
         results.append(output)
         print(f"Iteration {i}\n{output}\n\n{'#'*120}")
     ds = ds.add_column(ACTUAL_COL, results)
-    save_dataset(ds, result_path=result_path)
+    save_dataset(ds, data_config=data_config)
     return ds
 
 
-def compare(ds, result_path: str, actual_col: str = ACTUAL_COL, label_col: str = LABEL_COL):
+def compare(ds, data_config: DataConfig, actual_col: str = ACTUAL_COL, label_col: str = LABEL_COL):
     rouge = ROUGEScore()
     def row_compare(sample):
         # we define "is_label_contained" as "correct" to have a simple binary measure
@@ -66,7 +81,7 @@ def compare(ds, result_path: str, actual_col: str = ACTUAL_COL, label_col: str =
         sample[ROUGE_COL] = rouge(preds=sample[actual_col], target=sample[label_col][0])['rouge1_fmeasure']
         return sample
     ds = ds.map(row_compare, num_proc=8)
-    save_dataset(ds, result_path=result_path)
+    save_dataset(ds, data_config=data_config)
     return ds
 
 def compute_metrics(ds):
@@ -75,24 +90,14 @@ def compute_metrics(ds):
     metrics["avg_rouge"] = sum(ds[ROUGE_COL]) / len(ds)
     return metrics
 
-class EvalConfig(BaseModel):
-    dataset: str
-    split: str
-    model: str
-    num_proc: int
-    output_path: str
-    torch_dtype:str
-    device_map:str
-    max_new_tokens: int
-    adapter_path: str | None = None
-    
-
 def main(eval_config: EvalConfig | dict):
+    # TODO: check if everything for saving is sset (repo_id and HF_TOKEN)
     eval_config = eval_config if isinstance(eval_config, EvalConfig) else EvalConfig(**eval_config)
     wandb.init(project="eval-qwen", config=eval_config)
-    val_ds = load_dataset(eval_config.dataset, split=eval_config.split)
+    val_ds = load_dataset(eval_config.data_config.dataset, split=eval_config.data_config.split)
+    val_ds = val_ds.select(range(32))
     if not CONVERSATION_COL in val_ds.column_names:
-        val_ds = val_ds.map(make_conversation, num_proc=eval_config.num_proc)
+        val_ds = val_ds.map(make_conversation, num_proc=eval_config.data_config.num_proc)
     if not ACTUAL_COL in val_ds.column_names:
         processor = AutoProcessor.from_pretrained(eval_config.model)
         # Load the model in half-precision on the available device(s)
@@ -100,9 +105,9 @@ def main(eval_config: EvalConfig | dict):
         if eval_config.adapter_path:
             model.load_adapter(eval_config.adapter_path)
         print(model)
-        eval_ds = eval(model, processor , val_ds, eval_config.max_new_tokens, eval_config.output_path)
+        eval_ds = eval(model, processor , val_ds, eval_config.max_new_tokens, eval_config.data_config)
     if not (ROUGE_COL in val_ds.column_names and CORRECT_COL in val_ds.column_names):
-        eval_ds = compare(eval_ds, eval_config.output_path)
+        eval_ds = compare(eval_ds, eval_config.data_config)
     eval_metrics = compute_metrics(eval_ds)
     wandb.log(eval_metrics)
     # TODO write metrics somewhere
