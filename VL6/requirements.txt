@@ -1,0 +1,15 @@
+ipykernel
+pillow
+datasets
+torch
+transformers==4.46.3
+trl
+accelerate
+pydantic
+PyYAML
+torchmetrics
+peft
+bitsandbytes
+wandb
+nltk
+jinja2==3.1.0

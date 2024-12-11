@@ -1,0 +1,11 @@
+model: Qwen/Qwen2-VL-7B-Instruct
+torch_dtype: bfloat16 
+device_map: auto
+max_new_tokens: 128
+adapter_path: HWGuncoverAI/chart_qwen_adapter
+data_config:
+  dataset: HuggingFaceM4/ChartQA
+  split: val
+  num_proc: 16
+  repo_id: HWGuncoverAI/chartQA
+  revision: post_eval
