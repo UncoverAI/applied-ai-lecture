@@ -1,4 +1,4 @@
-from transformers import BitsAndBytesConfig, Qwen2VLForConditionalGeneration, AutoProcessor, Qwen2VLProcessor
+from transformers import BitsAndBytesConfig, Qwen2VLForConditionalGeneration, Qwen2VLProcessor, AutoTokenizer, AutoModelForCausalLM
 import wandb
 from peft import LoraConfig, get_peft_model
 from trl import SFTConfig
@@ -7,15 +7,21 @@ from trl import SFTTrainer
 from datasets import load_dataset
  
 def make_conversation(sample):
-    sample["conversation"] = [
-        {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample["query"]}]},
-        {"role": "assistant", "content": [{"type": "text",  "text": sample["label"][0]}]}
-    ]
+    if "image" not in sample:
+        sample["conversation"] = [
+            {"role": "user", "content": sample["query"]},
+            {"role": "assistant", "content": sample["label"][0]}
+        ]
+    else:
+        sample["conversation"] = [
+            {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample["query"]}]},
+            {"role": "assistant", "content": [{"type": "text",  "text": sample["label"][0]}]}
+        ]
     return sample
 
 def get_collate_fn(processor):
     # Create a data collator to encode text and image pairs
-    def collate_fn(examples):
+    def image_collate_fn(examples):
         # Get the texts and images, and apply the chat template
         texts = [
             processor.apply_chat_template(example["conversation"], tokenize=False) for example in examples
@@ -44,7 +50,18 @@ def get_collate_fn(processor):
         batch["labels"] = labels  # Add labels to the batch
 
         return batch  # Return the prepared batch
-    return collate_fn
+    
+    def text_collate_fn(examples):
+        texts = [processor.apply_chat_template(example["conversation"]) for example in examples]
+        batch = processor(text=texts, return_tensors="pt", padding=True)
+        labels = batch["input_ids"].clone()
+        labels[labels == processor.tokenizer.pad_token_id] = -100
+        batch["labels"] = labels
+        return batch
+    if isinstance(processor, Qwen2VLProcessor):
+        return image_collate_fn
+    else:
+        return text_collate_fn
 
 class QuantConfig(BaseModel):
     # BitsAndBytesConfig int-4 config
@@ -92,6 +109,7 @@ class Arguments(BaseModel):
     remove_unused_columns: bool = False
 
 class TrainConfig(BaseModel):
+    run_name: str = "default_tune"
     dataset: str
     num_proc: int
     model: ModelConfig
@@ -111,10 +129,16 @@ def get_model(model_config: ModelConfig):
         bnb_config = BitsAndBytesConfig(**model_config.quant_config.model_dump(), bnb_4bit_compute_dtype=model_config.torch_dtype)
     
     # Load model and tokenizer
-    processor = Qwen2VLProcessor.from_pretrained(model_config.model_id)
-    model = Qwen2VLForConditionalGeneration.from_pretrained(
-        model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
-    )
+    if "qwen" in model_config.model_id:
+        processor = Qwen2VLProcessor.from_pretrained(model_config.model_id)
+        model = Qwen2VLForConditionalGeneration.from_pretrained(
+            model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
+        )
+    else:
+        processor = AutoTokenizer.from_pretrained(model_config.model_id)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
+        )
     
     if model_config.lora_config:
         model = create_peft_model(model, model_config.lora_config)
@@ -123,7 +147,7 @@ def get_model(model_config: ModelConfig):
 
 def main(train_config: TrainConfig | dict):
     train_config = train_config if isinstance(train_config, TrainConfig) else TrainConfig(**train_config)
-    wandb.init(project="tune-qwen", config=train_config)
+    wandb.init(project=train_config.run_name, config=train_config)
     # Configure training arguments
     training_args = SFTConfig(**train_config.args.model_dump())
     model, processor = get_model(model_config=train_config.model)
