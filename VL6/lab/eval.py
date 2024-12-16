@@ -6,10 +6,27 @@ import wandb
 
 ACTUAL_COL = "results"
 LABEL_COL = "label"
+QUERY_COL = "query"
 CONVERSATION_COL = "conversation"
 ROUGE_COL = "rouge"
 CORRECT_COL = "correct"
 
+class DataConfig(BaseModel):
+    dataset: str
+    split: str
+    repo_id: str
+    num_proc: int
+    revision: str | None = None
+
+class EvalConfig(BaseModel):
+    run_name: str = "default_eval"
+    model: str
+    torch_dtype:str
+    device_map:str
+    max_new_tokens: int
+    data_config: DataConfig
+    adapter_path: str | None = None
+    
 def chat(model, processor, conversation, image, max_new_tokens, verbose = True):
     # Preprocess the inputs
     text_prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
@@ -32,33 +49,22 @@ def chat(model, processor, conversation, image, max_new_tokens, verbose = True):
     )
     return output_text[0]
 
-class DataConfig(BaseModel):
-    dataset: str
-    split: str
-    repo_id: str
-    num_proc: int
-    revision: str | None = None
-
-class EvalConfig(BaseModel):
-    model: str
-    torch_dtype:str
-    device_map:str
-    max_new_tokens: int
-    data_config: DataConfig
-    adapter_path: str | None = None
-
 def make_conversation(sample):
-    sample[CONVERSATION_COL] = [
-        {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample["query"]}]}
-    ]
+    if "image" not in sample:
+        sample[CONVERSATION_COL] = [
+            {"role": "user", "content": sample[QUERY_COL]},
+        ]
+    else:
+        sample[CONVERSATION_COL] = [
+            {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample[QUERY_COL]}]},
+        ]
     return sample
 
 def save_dataset(ds: Dataset, data_config: DataConfig):
     # TODO potentially push to hub instead of using local storage
     # Saving images is not necessary
     ds = ds.remove_columns("image")
-    ds.push_to_hub(repo_id=data_config.repo_id, revision=data_config.revision)
-    
+    ds.push_to_hub(repo_id=data_config.repo_id, revision=data_config.revision)  
     
 def eval(model, processor: AutoProcessor, ds: Dataset, max_new_tokens: int, data_config: DataConfig):
     model.eval()
@@ -70,7 +76,6 @@ def eval(model, processor: AutoProcessor, ds: Dataset, max_new_tokens: int, data
     ds = ds.add_column(ACTUAL_COL, results)
     save_dataset(ds, data_config=data_config)
     return ds
-
 
 def compare(ds, data_config: DataConfig, actual_col: str = ACTUAL_COL, label_col: str = LABEL_COL):
     rouge = ROUGEScore()
@@ -93,7 +98,7 @@ def compute_metrics(ds):
 def main(eval_config: EvalConfig | dict):
     # TODO: check if everything for saving is sset (repo_id and HF_TOKEN)
     eval_config = eval_config if isinstance(eval_config, EvalConfig) else EvalConfig(**eval_config)
-    wandb.init(project="eval-qwen", config=eval_config)
+    wandb.init(project=eval_config.run_name, config=eval_config)
     val_ds = load_dataset(eval_config.data_config.dataset, split=eval_config.data_config.split)
     if not CONVERSATION_COL in val_ds.column_names:
         val_ds = val_ds.map(make_conversation, num_proc=eval_config.data_config.num_proc)
@@ -109,7 +114,6 @@ def main(eval_config: EvalConfig | dict):
         eval_ds = compare(eval_ds, eval_config.data_config)
     eval_metrics = compute_metrics(eval_ds)
     wandb.log(eval_metrics)
-    # TODO write metrics somewhere
     print(eval_metrics)
 
 if __name__=="__main__":

@@ -1,50 +1,10 @@
-from transformers import BitsAndBytesConfig, Qwen2VLForConditionalGeneration, AutoProcessor, Qwen2VLProcessor
+from transformers import BitsAndBytesConfig, Qwen2VLForConditionalGeneration, Qwen2VLProcessor, AutoTokenizer, AutoModelForCausalLM
 import wandb
 from peft import LoraConfig, get_peft_model
 from trl import SFTConfig
 from pydantic import BaseModel
 from trl import SFTTrainer
 from datasets import load_dataset
- 
-def make_conversation(sample):
-    sample["conversation"] = [
-        {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample["query"]}]},
-        {"role": "assistant", "content": [{"type": "text",  "text": sample["label"][0]}]}
-    ]
-    return sample
-
-def get_collate_fn(processor):
-    # Create a data collator to encode text and image pairs
-    def collate_fn(examples):
-        # Get the texts and images, and apply the chat template
-        texts = [
-            processor.apply_chat_template(example["conversation"], tokenize=False) for example in examples
-        ]  # Prepare texts for processing
-        image_inputs = [example["image"] for example in examples]  # Process the images to extract inputs
-
-        # Tokenize the texts and process the images
-        batch = processor(
-            text=texts, images=image_inputs, return_tensors="pt", padding=True
-        )  # Encode texts and images into tensors
-
-        # The labels are the input_ids, and we mask the padding tokens in the loss computation
-        labels = batch["input_ids"].clone()  # Clone input IDs for labels
-        labels[labels == processor.tokenizer.pad_token_id] = -100  # Mask padding tokens in labels
-
-        # Ignore the image token index in the loss computation (model specific)
-        if isinstance(processor, Qwen2VLProcessor):  # Check if the processor is Qwen2VLProcessor
-            image_tokens = [151652, 151653, 151655]  # Specific image token IDs for Qwen2VLProcessor
-        else:
-            image_tokens = [processor.tokenizer.convert_tokens_to_ids(processor.image_token)]  # Convert image token to ID
-
-        # Mask image token IDs in the labels
-        for image_token_id in image_tokens:
-            labels[labels == image_token_id] = -100  # Mask image token IDs in labels
-
-        batch["labels"] = labels  # Add labels to the batch
-
-        return batch  # Return the prepared batch
-    return collate_fn
 
 class QuantConfig(BaseModel):
     # BitsAndBytesConfig int-4 config
@@ -92,10 +52,68 @@ class Arguments(BaseModel):
     remove_unused_columns: bool = False
 
 class TrainConfig(BaseModel):
+    run_name: str = "default_tune"
     dataset: str
     num_proc: int
     model: ModelConfig
     args: Arguments
+    
+def make_conversation(sample):
+    if "image" not in sample:
+        sample["conversation"] = [
+            {"role": "user", "content": sample["query"]},
+            {"role": "assistant", "content": sample["label"][0]}
+        ]
+    else:
+        sample["conversation"] = [
+            {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample["query"]}]},
+            {"role": "assistant", "content": [{"type": "text",  "text": sample["label"][0]}]}
+        ]
+    return sample
+
+def get_collate_fn(processor):
+    # Create a data collator to encode text and image pairs
+    def image_collate_fn(examples):
+        # Get the texts and images, and apply the chat template
+        texts = [
+            processor.apply_chat_template(example["conversation"], tokenize=False) for example in examples
+        ]  # Prepare texts for processing
+        image_inputs = [example["image"] for example in examples]  # Process the images to extract inputs
+
+        # Tokenize the texts and process the images
+        batch = processor(
+            text=texts, images=image_inputs, return_tensors="pt", padding=True
+        )  # Encode texts and images into tensors
+
+        # The labels are the input_ids, and we mask the padding tokens in the loss computation
+        labels = batch["input_ids"].clone()  # Clone input IDs for labels
+        labels[labels == processor.tokenizer.pad_token_id] = -100  # Mask padding tokens in labels
+
+        # Ignore the image token index in the loss computation (model specific)
+        if isinstance(processor, Qwen2VLProcessor):  # Check if the processor is Qwen2VLProcessor
+            image_tokens = [151652, 151653, 151655]  # Specific image token IDs for Qwen2VLProcessor
+        else:
+            image_tokens = [processor.tokenizer.convert_tokens_to_ids(processor.image_token)]  # Convert image token to ID
+
+        # Mask image token IDs in the labels
+        for image_token_id in image_tokens:
+            labels[labels == image_token_id] = -100  # Mask image token IDs in labels
+
+        batch["labels"] = labels  # Add labels to the batch
+
+        return batch  # Return the prepared batch
+    
+    def text_collate_fn(examples):
+        texts = [processor.apply_chat_template(example["conversation"], tokenize=False) for example in examples]
+        batch = processor(text=texts, return_tensors="pt", padding=True)
+        labels = batch["input_ids"].clone()
+        labels[labels == processor.pad_token_id] = -100
+        batch["labels"] = labels
+        return batch
+    if isinstance(processor, Qwen2VLProcessor):
+        return image_collate_fn
+    else:
+        return text_collate_fn
 
 def create_peft_model(model, lora_config: MyLoraConfig):
     lora_config = LoraConfig(**lora_config.model_dump())
@@ -111,10 +129,17 @@ def get_model(model_config: ModelConfig):
         bnb_config = BitsAndBytesConfig(**model_config.quant_config.model_dump(), bnb_4bit_compute_dtype=model_config.torch_dtype)
     
     # Load model and tokenizer
-    processor = Qwen2VLProcessor.from_pretrained(model_config.model_id)
-    model = Qwen2VLForConditionalGeneration.from_pretrained(
-        model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
-    )
+    if "qwen" in model_config.model_id:
+        processor = Qwen2VLProcessor.from_pretrained(model_config.model_id)
+        model = Qwen2VLForConditionalGeneration.from_pretrained(
+            model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
+        )
+    else:
+        processor = AutoTokenizer.from_pretrained(model_config.model_id)
+        processor.pad_token = processor.eos_token
+        model = AutoModelForCausalLM.from_pretrained(
+            model_config.model_id, device_map=model_config.device_map, torch_dtype=model_config.torch_dtype, quantization_config=bnb_config
+        )
     
     if model_config.lora_config:
         model = create_peft_model(model, model_config.lora_config)
@@ -123,11 +148,11 @@ def get_model(model_config: ModelConfig):
 
 def main(train_config: TrainConfig | dict):
     train_config = train_config if isinstance(train_config, TrainConfig) else TrainConfig(**train_config)
-    wandb.init(project="tune-qwen", config=train_config)
+    wandb.init(project=train_config.run_name, config=train_config)
     # Configure training arguments
     training_args = SFTConfig(**train_config.args.model_dump())
     model, processor = get_model(model_config=train_config.model)
-    
+    tokenizer = processor.tokenizer if "qwen" in train_config.model.model_id else processor
     ds = load_dataset(train_config.dataset)
     #ds = {key: value.select(range(256)) for key, value in ds.items()}
     train_dataset, eval_dataset = ds["train"].map(make_conversation, num_proc=train_config.num_proc) , ds["test"].map(make_conversation, num_proc=train_config.num_proc)
@@ -139,12 +164,13 @@ def main(train_config: TrainConfig | dict):
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=get_collate_fn(processor),
-        tokenizer=processor.tokenizer,
+        tokenizer=tokenizer,
     )
 
     trainer.train()
     trainer.save_model(training_args.output_dir)
     model.push_to_hub(repo_id=train_config.model.repo_id)
+    processor.push_to_hub(repo_id=train_config.model.repo_id)
 
 if __name__=="__main__":
     import argparse
