@@ -6,5 +6,5 @@ data_config:
   dataset: HWGuncoverAI/riddles
   split: test
   num_proc: 1
-  repo_id: HWGuncoverAI/riddles
+  repo_id: HWGuncoverAI/riddles_new
   revision: pre_eval
