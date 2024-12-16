@@ -1,5 +1,5 @@
 from datasets import load_dataset, Dataset
-from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
+from transformers import Qwen2VLForConditionalGeneration, Qwen2VLProcessor, AutoTokenizer, AutoModelForCausalLM
 from pydantic import BaseModel
 from torchmetrics.text import ROUGEScore
 import wandb
@@ -29,12 +29,17 @@ class EvalConfig(BaseModel):
     
 def chat(model, processor, conversation, image, max_new_tokens, verbose = True):
     # Preprocess the inputs
-    text_prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+    text_prompt = processor.apply_chat_template(conversation, tokenize=False, add_generation_prompt=True)
     if verbose:
         print(text_prompt)
-    inputs = processor(
-        text=[text_prompt], images=[image], padding=True, return_tensors="pt"
-    )
+    if image is not None:
+        inputs = processor(
+            text=[text_prompt], images=[image], padding=True, return_tensors="pt"
+        )
+    else:
+        inputs = processor(
+            text=[text_prompt], padding=True, return_tensors="pt"
+        )
     inputs = inputs.to(model.device)
     if verbose:
         print([f"{key}: {value.shape}" for key, value in inputs.items()])
@@ -63,14 +68,18 @@ def make_conversation(sample):
 def save_dataset(ds: Dataset, data_config: DataConfig):
     # TODO potentially push to hub instead of using local storage
     # Saving images is not necessary
-    ds = ds.remove_columns("image")
+    if "image" in ds.column_names:
+        ds = ds.remove_columns("image")
     ds.push_to_hub(repo_id=data_config.repo_id, revision=data_config.revision)  
     
-def eval(model, processor: AutoProcessor, ds: Dataset, max_new_tokens: int, data_config: DataConfig):
+def eval(model, processor, ds: Dataset, max_new_tokens: int, data_config: DataConfig):
     model.eval()
     results = []
     for i, sample in enumerate(ds):
-        output = chat(model, processor, sample[CONVERSATION_COL], sample["image"], max_new_tokens=max_new_tokens, verbose=False)
+        if "image" in sample:
+            output = chat(model, processor, sample[CONVERSATION_COL], sample["image"], max_new_tokens=max_new_tokens, verbose=False)
+        else:
+            output = chat(model, processor, sample[CONVERSATION_COL], None, max_new_tokens=max_new_tokens, verbose=False)
         results.append(output)
         print(f"Iteration {i}\n{output}\n\n{'#'*120}")
     ds = ds.add_column(ACTUAL_COL, results)
@@ -103,9 +112,18 @@ def main(eval_config: EvalConfig | dict):
     if not CONVERSATION_COL in val_ds.column_names:
         val_ds = val_ds.map(make_conversation, num_proc=eval_config.data_config.num_proc)
     if not ACTUAL_COL in val_ds.column_names:
-        processor = AutoProcessor.from_pretrained(eval_config.model)
-        # Load the model in half-precision on the available device(s)
-        model = Qwen2VLForConditionalGeneration.from_pretrained(eval_config.model, torch_dtype=eval_config.torch_dtype, device_map=eval_config.device_map)
+        # Load model and tokenizer
+        if "qwen" in eval_config.model.lower():
+            processor = Qwen2VLProcessor.from_pretrained(eval_config.model)
+            model = Qwen2VLForConditionalGeneration.from_pretrained(
+                eval_config.model, device_map=eval_config.device_map, torch_dtype=eval_config.torch_dtype
+            )
+        else:
+            processor = AutoTokenizer.from_pretrained(eval_config.model)
+            processor.pad_token = processor.eos_token
+            model = AutoModelForCausalLM.from_pretrained(
+                eval_config.model, device_map=eval_config.device_map, torch_dtype=eval_config.torch_dtype
+            )
         if eval_config.adapter_path:
             model.load_adapter(eval_config.adapter_path)
         print(model)
