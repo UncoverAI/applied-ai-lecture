@@ -11,6 +11,22 @@ CONVERSATION_COL = "conversation"
 ROUGE_COL = "rouge"
 CORRECT_COL = "correct"
 
+class DataConfig(BaseModel):
+    dataset: str
+    split: str
+    repo_id: str
+    num_proc: int
+    revision: str | None = None
+
+class EvalConfig(BaseModel):
+    run_name: str = "default_eval"
+    model: str
+    torch_dtype:str
+    device_map:str
+    max_new_tokens: int
+    data_config: DataConfig
+    adapter_path: str | None = None
+    
 def chat(model, processor, conversation, image, max_new_tokens, verbose = True):
     # Preprocess the inputs
     text_prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
@@ -33,26 +49,15 @@ def chat(model, processor, conversation, image, max_new_tokens, verbose = True):
     )
     return output_text[0]
 
-class DataConfig(BaseModel):
-    dataset: str
-    split: str
-    repo_id: str
-    num_proc: int
-    revision: str | None = None
-
-class EvalConfig(BaseModel):
-    run_name: str = "default_eval"
-    model: str
-    torch_dtype:str
-    device_map:str
-    max_new_tokens: int
-    data_config: DataConfig
-    adapter_path: str | None = None
-
 def make_conversation(sample):
-    sample[CONVERSATION_COL] = [
-        {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample[QUERY_COL]}]}
-    ]
+    if "image" not in sample:
+        sample[CONVERSATION_COL] = [
+            {"role": "user", "content": sample[QUERY_COL]},
+        ]
+    else:
+        sample[CONVERSATION_COL] = [
+            {"role": "user", "content": [{"type": "image"},{"type": "text",  "text": sample[QUERY_COL]}]},
+        ]
     return sample
 
 def save_dataset(ds: Dataset, data_config: DataConfig):

@@ -1,0 +1,10 @@
+model: meta-llama/Llama-3.2-1B-Instruct
+torch_dtype: bfloat16 
+device_map: auto
+max_new_tokens: 128
+data_config:
+  dataset: HWGuncoverAI/riddles
+  split: test
+  num_proc: 1
+  repo_id: HWGuncoverAI/riddles
+  revision: pre_eval
