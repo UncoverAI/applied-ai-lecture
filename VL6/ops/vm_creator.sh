@@ -9,8 +9,11 @@ make_api_call() {
          -H "api_key: $api_key"
 }
 
-# Prompt for API key and VM ID
-read -p "Enter your API key: " API_KEY
+# Prompt for API key (hidden input) and VM ID
+echo -n "Enter your API key: "
+read -s API_KEY
+echo  # Move to a new line after hidden input
+
 read -p "Enter the Virtual Machine ID: " VM_ID
 
 # Make API calls
