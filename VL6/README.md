@@ -3,11 +3,7 @@
 - Huggingface account & token
 - Wandb account & token
 
-# Setup
-- Create GPU on Hyperstack (detailed guide is below)
-- Setup & Run init.sh
-
-## Creating & Connecting a Hyperstack GPU
+# Creating & Connecting a Hyperstack GPU
 
 1. Go to the ``Virtual Machines`` tab and select `Deploy New Virtual Machine`
 ![Deploy VM](media/hs-1.png)
@@ -46,4 +42,4 @@
     3. `chmod +x init.sh` and `./init.sh`, now every new terminal will have the correct environment variables set for Machine Learning code.
 ![Verify Correct Setup](media/hs-10.png)
 ---
-**Congrats you are good to code!**
+**Congrats you are good to code&run to your ML pipeline now!**
