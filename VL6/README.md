@@ -5,7 +5,7 @@
 
 # Creating & Connecting a Hyperstack GPU
 
-1. Go to the ``Virtual Machines`` tab and select `Deploy New Virtual Machine`
+1. Go to the ``Virtual Machines`` tab (https://console.hyperstack.cloud/virtual-machines) and select `Deploy New Virtual Machine`
 ![Deploy VM](media/hs-1.png)
 ---
 2. Select the GPU Flavor that according to your needs. Remember that more powerful GPUs are more expensive and you are on a limited budget.

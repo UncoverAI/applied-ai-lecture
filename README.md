@@ -20,13 +20,11 @@ Code examples for the lecture
 
 1. Local LLM App with Python (Python + Streamlit + Ollama)
 2. Deep Learning basics with Computer Vision (Pytorch+NeuralNets+MNIST)
-3. Language Model Basics (Transformer + Attention)
-4. Advanced LLM Apps (AI Agents + Retrieval Augmented Generation)
-5. Advanced Deep Learning with LLMs (Fine-Tuning LLMs with 7B+ params)
-6. Deployment & OPS (Cloud, Docker, CICD & GPUs)
-7. Vision Transformer & Multi modal models
-8. Bring it together -> Vision Language Agent with RAG as service
-9. Advanced System Architecture (Host Vector DB, Host Embedding Model, Host App, Use Model API)
+3. Language Model Basics (Transformer +Attention)
+4. Advanced LLM Apps (Retrieval Augmented Generation + AI Agents) 
+5. Deployment & OPS (Cloud, Docker, CICD & GPUs)
+6. Fine-Tuning LLMs & VLMs
+7. Final Project Discussion
 
 ## Evaluation
 
